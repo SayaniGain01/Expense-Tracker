@@ -1,0 +1,191 @@
+openapi: "3.0.3"
+info:
+  title: Expense Tracker
+  version: "1.0"
+servers:
+  - url: https://api.server.test/v1
+paths:
+  /auth/signup:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+              properties:
+                name:
+                  type: string
+                  example: johndoe
+                email:
+                  type: string
+                  format: email
+                  example: johndoe@example.com
+                password:
+                  type: string
+                  format: password
+                  example: StrongPassword123!
+      responses:
+        "201":
+          description: OK
+        "400":
+          description: "Invalid description: {description_msg}"
+        "500":
+          description: "Try again later"
+  /auth/login:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: johndoe@example.com
+                password:
+                  type: string
+                  format: password
+                  example: StrongPassword123!
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: "Invalid username or password"
+        "500":
+          description: "Try again later"
+  /user:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - name
+                  - email
+                  - user_id
+                properties:
+                  name:
+                    type: string
+                    example: Sayani Gain
+                  email:
+                    type: string
+                    format: email
+                    example: sayani@example.com
+                  user_id:
+                    type: string
+                    example: sayani@example.com
+                  monthly_expense:
+                    type: number
+                    example: 5000
+
+        "400":
+          description: Invalid username or password
+        "500":
+          description: Try again later
+  /expense:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - exp_type
+                    - exp_amount
+                    - exp_date
+                    - exp_desc
+                  properties:
+                    exp_type:
+                      type: string
+                      example: Groceries
+                    exp_amount:
+                      type: number
+                      format: float
+                      example: 2500
+                    exp_date:
+                      type: string
+                      format: date
+                      example: 2025-01-10
+                    exp_desc:
+                      type: string
+                      example: "Some description"
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                  - exp_type
+                  - exp_amount
+                  - exp_desc
+                  - exp_date
+              properties:
+                exp_type:
+                  type: string
+                  example: Groceries
+                exp_amount:
+                  type: number
+                  example: 2000
+                exp_desc:
+                  type: string
+                  example: "Some description"
+                exp_date:
+                      type: string
+                      format: date
+                      example: 2025-01-10
+                  
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - exp_type
+                  - exp_amount
+                  - exp_desc
+                  - exp_date
+                properties:
+                  exp_type:
+                    type: string
+                    example: Groceries
+                  exp_amount:
+                    type: number
+                    format: float
+                    example: 2000
+                  exp_date:
+                    type: string
+                    format: date
+                    example: 2025-01-10
+                  exp_desc:
+                    type: string
+                    example: "Some description"
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
