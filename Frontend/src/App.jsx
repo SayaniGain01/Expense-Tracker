@@ -1,34 +1,28 @@
 import { useState } from 'react'
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Login from "./Login";
-import SignUp from './Signup'
-import './App.css'
+import SignUp from './SignUp'
+import Dashboard from './Dashboard';
+import Profile from './Profile';
+import './App.css';
+import RootLayout from './RootLayout';
 
 function App() {
-  const [count, setCount] = useState(0)
   const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <Login />,
-  },
-  {
-    path: "/signup",
-    element: <SignUp />,
-  },
-]);
+    {
+      path: '/',
+      element: <RootLayout />,
+      children: [
+        { index: true, element: <Login /> },
+        { path: 'signup', element: <SignUp /> },
+        { path: 'dashboard', element: <Dashboard /> },
+        { path: 'profile', element: <Profile /> },
+      ],
+    },
+  ]);
 
-
-  return (
-    <div className="flex h-screen">
-      {/* left side */}
-      <div className='w-1/2 bg-teal-700'></div>
-      
-      {/* right side */}
-      <div className='w-1/2 flex justify-center items-center bg-white'>
-        <RouterProvider router={router} />
-      </div>
-    </div>
-  )
+  return <RouterProvider router={router} />;
 }
 
-export default App
+export default App;
+
