@@ -7,3 +7,4 @@ class UserSignUp(BaseModel):
 class UserLogIn(BaseModel):
     email:str
     password:str
+

@@ -1,5 +1,5 @@
 import datetime
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, File, Form, Request, Response, UploadFile
 from db import run_query
 from model.category import Category
 from model.expense import Expense
@@ -7,7 +7,7 @@ from model.user import UserLogIn, UserSignUp
 import bcrypt
 import jwt
 from dotenv import load_dotenv
-from utils import decodeJWT
+from utils import decodeJWT, upload_image
 load_dotenv()
 import os
 from fastapi.middleware.cors import CORSMiddleware
@@ -49,7 +49,7 @@ def signUp(user: UserSignUp):
         return{"message": "User retrieved successfully"}
     except Exception as e:
         print(e)
-        return{"message": "Try again bitches"}
+        return{"message": "Try again"}
     
 @app.post("/auth/login")
 def login(user: UserLogIn,response:Response):
@@ -71,7 +71,7 @@ def login(user: UserLogIn,response:Response):
         return {"message": "Invalid email id or password"}
     payload = {
     "user_id": row["user_id"],
-    "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=1)
+    "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=3)
     }
     SECRET_KEY=os.getenv("SECRET_KEY")
     token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
@@ -81,15 +81,32 @@ def login(user: UserLogIn,response:Response):
 @app.get("/user")
 def user_profile(request:Request):
     user_id=decodeJWT(request)
-    result=run_query("SELECT * FROM user WHERE user_id=%s",(user_id,))
-    sliced=dict(list(result[0].items())[:4])
+    result=run_query("SELECT user_name,email_id,image,user_id,phone FROM user WHERE user_id=%s",(user_id,))
+    sliced=dict(list(result[0].items()))
     return {"message": "email fetched","data":sliced}
-    
 
+@app.put("/user")
+async def update_user(
+    request: Request,
+    name: str = Form(...),
+    email: str = Form(...),
+    phone: str = Form(...),
+    file: UploadFile = File(...)
+):
+    user_id=decodeJWT(request)
+    # Now file + form fields will work together
+    result = await upload_image(file)
+    run_query("UPDATE user SET user_name=%s,email_id=%s,phone=%s,image=%s WHERE user_id=%s",(name,email,phone,result["secure_url"],user_id))
+    return {"message": "User updated", "image_url": result}
+
+    
 @app.get("/expense")
 def get_expense(request:Request):
     user_id=decodeJWT(request)
-    result=run_query("SELECT * FROM expense WHERE user_id=%s",(user_id,))
+    result=run_query('''SELECT expense.exp_amount,expense.exp_date,
+        expense.exp_description,expense.exp_id,category.cat_name
+        FROM expense,category
+        WHERE expense.cat_id=category.cat_id AND user_id=%s''',(user_id,))
     return {"message": "data fetched successfully", "data":result}
 
 @app.post("/expense")
@@ -99,7 +116,14 @@ def create_expense(request:Request,expense:Expense):
         "INSERT INTO expense (user_id,cat_id,exp_date,exp_amount,exp_description) VALUES (%s,%s,%s,%s,%s)",
         (user_id,expense.exp_type,expense.exp_date,expense.exp_amount,expense.exp_des)
     )
-    return{"message":"Expense created succuessfully"}
+    return{"message":"Expense created succuessfully","data":result}
+
+@app.get("/category")
+def get_cat():
+    result=run_query(
+        " SELECT * FROM category "
+    )
+    return{"message":"Category fetched successfully","data":result}
 
 @app.post("/category")
 def cat(request:Request,category:Category):
