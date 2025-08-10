@@ -78,6 +78,11 @@ def login(user: UserLogIn,response:Response):
     response.set_cookie(key="session_token", value=token, httponly=True, samesite="lax", secure=False)
     return {"message":"LogIn successful!"}
 
+@app.get("/auth/logout")
+def logout(response:Response):
+    response.delete_cookie(key="session_token")
+    return {"message": "Logged out"}
+
 @app.get("/user")
 def user_profile(request:Request):
     user_id=decodeJWT(request)
