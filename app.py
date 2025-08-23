@@ -1,5 +1,6 @@
 import datetime
 from fastapi import FastAPI, File, Form, Request, Response, UploadFile
+from constants.query import SELECT_PIE_EXPENSES, SELECT_TOP3_EXPENSES_OF_LAST_3_MONTHS_EACH
 from db import run_query
 from model.category import Category
 from model.expense import Expense
@@ -7,10 +8,11 @@ from model.user import UserLogIn, UserSignUp
 import bcrypt
 import jwt
 from dotenv import load_dotenv
-from utils import decodeJWT, upload_image
+from utils import decodeJWT, getMonthFromNum, upload_image
 load_dotenv()
 import os
 from fastapi.middleware.cors import CORSMiddleware
+import json
 
 app = FastAPI()
 # List of allowed origins (frontend URLs)
@@ -138,3 +140,40 @@ def cat(request:Request,category:Category):
         (category.cat_name,)
     )
     return{"message":"Category created succuessfully"}
+
+@app.get("/charts/piechart")
+def getPirchart(request:Request):
+    user_id = decodeJWT(request)
+    result=run_query(SELECT_PIE_EXPENSES, (user_id,))
+    print(result)
+    dataset = []
+    for row in result:
+        dataset.append({
+            "label": row["cat_name"],
+            "value":row["amount"],
+            "id":row["cat_id"]
+        })
+    return {"dataset":dataset}
+
+@app.get("/charts/barchart")
+def getBarchart(request:Request):
+    user_id=decodeJWT(request)
+    result=run_query(SELECT_TOP3_EXPENSES_OF_LAST_3_MONTHS_EACH,(user_id,))
+    print(result)
+    output=[]
+    series=set()
+    for item in result:
+        element=json.loads(item['result'])
+        for key in element:
+            series.add(key)
+        element['month_']=getMonthFromNum(element['month_'])
+        output.append(element)
+        
+    seriesFormatted=[]
+    for item in series:
+        if(item == 'month_'):
+            continue
+        seriesItem={"dataKey":item,"label":item}
+        seriesFormatted.append(seriesItem)
+    return{"dataset": output,"series":seriesFormatted}
+

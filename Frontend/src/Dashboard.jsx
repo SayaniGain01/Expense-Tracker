@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from "react";
 import { PieChart } from "@mui/x-charts/PieChart";
-import { BarChart } from '@mui/x-charts/BarChart';
+import { BarChart } from "@mui/x-charts/BarChart";
 import ExpenseCard from "./components/ExpenseCard";
 import ExpenseForm from "./components/ExpenseForm";
 import { fetchUserInfo } from "./service/profile";
@@ -11,7 +11,9 @@ import AppContextProvider, { AppContext } from "./context/AppContext";
 export default function Dashboard() {
   const [cat, setCat] = useState([]);
   const [expenses, setExpenses] = useState([]);
-  const {setUser,user,setLoginStatus}= useContext(AppContext)
+  const [piechartData, setPiechartData] = useState([]);
+  const [barchartData, setBarchartData] = useState(null);
+  const { setUser, user, setLoginStatus } = useContext(AppContext);
 
   async function getCategory() {
     const response = await fetch("http://localhost:8000/category", {
@@ -25,15 +27,7 @@ export default function Dashboard() {
     console.log(data);
   }
 
-  useEffect(() => {
-    getCategory();
-  }, []);
-
-  useEffect(()=>{
-    setLoginStatus(true)
-  },[]);
-
-  async function fetchData() {
+  async function getExpenses() {
     try {
       const response = await fetch("http://localhost:8000/expense", {
         method: "GET",
@@ -50,10 +44,6 @@ export default function Dashboard() {
     }
   }
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   function calculateAmount() {
     const total = expenses.reduce((acc, curr) => {
       return acc + curr.exp_amount;
@@ -61,24 +51,30 @@ export default function Dashboard() {
     return total;
   }
 
-  function prepareDataForPiechart(category, expenses) {
-    if (expenses.length === 0 || category.length === 0 ) {
-      return [];
-    }
-    const data = category.map((el) => {
-      return {
-        label: el.cat_name,
-        id: el.cat_id,
-        value: 0,
-      };
+   async function getPieChart() {
+    const result = await fetch("http://localhost:8000/charts/piechart", {
+      credentials: "include",
     });
-
-    expenses.forEach((item) => {
-      const ob = data.find((el) => el.label === item.cat_name);
-      ob.value += item.exp_amount;
-    });
-    return data;
+    const data = await result.json();
+    setPiechartData(data.dataset);
   }
+
+  async function getBarChart() {
+    const result = await fetch("http://localhost:8000/charts/barchart", {
+      credentials: "include",
+    });
+    const data = await result.json();
+    setBarchartData(data);
+  }
+  
+  useEffect(() => {
+    getCategory();
+    setLoginStatus(true);
+    getExpenses();
+    getPieChart();
+    getBarChart();
+  }, []);
+
 
   return (
     <div className="bg-gray-200 h-screen w-screen">
@@ -104,7 +100,7 @@ export default function Dashboard() {
               colors={["#004c4c", "#66b2b2", "#b2d8d8"]}
               series={[
                 {
-                  data: prepareDataForPiechart(cat, expenses),
+                  data: piechartData,
                 },
               ]}
               width={200}
@@ -112,15 +108,13 @@ export default function Dashboard() {
             />
           </div>
           <div className="px-7 py-2 bg-white flex items-center rounded-2xl">
-            <BarChart
-              xAxis={[{ data: ["group A", "group B", "group C"] }]}
-              series={[
-                { data: [4, 3, 5] },
-                { data: [1, 6, 3] },
-                { data: [2, 5, 6] },
-              ]}
+            {barchartData && <BarChart
+              colors={["#004c4c","#b2d8d8", "#66b2b2"]}
+              dataset={barchartData.dataset}
+              xAxis={[{ dataKey: "month_" }]}
+              series={barchartData.series}
               height={250}
-            />
+            />}
           </div>
         </div>
         <div className="flex flex-col p-5 gap-7 px-20">

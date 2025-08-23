@@ -41,3 +41,8 @@ async def upload_image(file: UploadFile = File(...)):
     except Exception as e:
         print(f"Error: {e}")
         return {"error": str(e)}
+    
+def getMonthFromNum(num):
+    months=["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+          "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    return months[num-1]
