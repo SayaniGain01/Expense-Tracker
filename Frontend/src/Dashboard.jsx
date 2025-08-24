@@ -97,7 +97,7 @@ export default function Dashboard() {
         <div className="flex flex-col py-5 gap-7">
           <div className="px-7 py-2 bg-white flex items-center rounded-2xl">
             <PieChart
-              colors={["#004c4c", "#66b2b2", "#b2d8d8"]}
+              colors={["#008080", "#66b2b2", "#b2d8d8"]}
               series={[
                 {
                   data: piechartData,
@@ -109,7 +109,7 @@ export default function Dashboard() {
           </div>
           <div className="px-7 py-2 bg-white flex items-center rounded-2xl">
             {barchartData && <BarChart
-              colors={["#004c4c","#b2d8d8", "#66b2b2"]}
+              colors={["#004c4c","#b2d8d8", "#006666"]}
               dataset={barchartData.dataset}
               xAxis={[{ dataKey: "month_" }]}
               series={barchartData.series}
