@@ -10,7 +10,7 @@ import jwt
 from dotenv import load_dotenv
 from utils import decodeJWT, getMonthFromNum, upload_image
 load_dotenv()
-import os
+import os,uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 import json
 
@@ -177,3 +177,7 @@ def getBarchart(request:Request):
         seriesFormatted.append(seriesItem)
     return{"dataset": output,"series":seriesFormatted}
 
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))  # Render sets PORT automatically
+    uvicorn.run("app:app", host="0.0.0.0", port=port, reload=False)
