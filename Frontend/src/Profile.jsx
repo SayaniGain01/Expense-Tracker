@@ -84,7 +84,7 @@ export default function Profile() {
           />
           <Link
             className="text-xs text-teal-700 cursor-pointer text-center "
-            to="http://"
+            to="/change-password"
           >
             Change Password?
           </Link>

@@ -4,7 +4,7 @@ from constants.query import SELECT_PIE_EXPENSES, SELECT_TOP3_EXPENSES_OF_LAST_3_
 from db import run_query
 from model.category import Category
 from model.expense import Expense
-from model.user import UserLogIn, UserSignUp
+from model.user import ChangePassword, ForgotPassword, UserLogIn, UserSignUp
 import bcrypt
 import jwt
 from dotenv import load_dotenv
@@ -13,12 +13,12 @@ load_dotenv()
 import os,uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 import json
+from send_email import send_email
 
 app = FastAPI()
 # List of allowed origins (frontend URLs)
 origins = [
-    "http://localhost:5173",  # React dev server
-    "https://your-frontend.com",  # Production frontend domain
+    "http://localhost:5173",  
 ]
 
 # Add CORS middleware
@@ -176,6 +176,65 @@ def getBarchart(request:Request):
         seriesItem={"dataKey":item,"label":item}
         seriesFormatted.append(seriesItem)
     return{"dataset": output,"series":seriesFormatted}
+
+@app.post("/change-password")
+def changePassword(request:Request,changePassword:ChangePassword):
+    user_id=changePassword.user_id
+    if (changePassword.token!=None):
+        token = changePassword.token
+        SECRET_KEY=os.getenv("SECRET_KEY")
+        try:
+            decoded = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        except:
+            return{"message":"Invalid Token"}
+        user_id=decoded["user_id"]
+        print(user_id)
+        
+    result=run_query(
+        "SELECT * FROM  user WHERE user_id = %s ",
+        (user_id,)
+    )
+    if len(result)==0:
+        return {"message": "Invalid user"}
+    row=result[0]
+    
+    token = changePassword.token
+    if(token == None):
+        salt=row["salt"]
+        salt_bytes=salt.encode('utf-8')
+        password=changePassword.current_pass
+        password_bytes=password.encode('utf-8')
+        hashed=bcrypt.hashpw(password_bytes,salt_bytes)
+        if row["user_password"]!=hashed.decode('utf-8'):
+            print(hashed)
+            print(row["user_password"])
+            return {"message": "Invalid password"}
+    
+    
+    password = changePassword.new_pass
+    password_bytes= password.encode('utf-8')
+    salt=bcrypt.gensalt()
+    hashed=bcrypt.hashpw(password_bytes,salt)
+    run_query("UPDATE user SET user_password = %s,salt=%s WHERE user_id = %s",(hashed,salt,user_id)
+    )
+    return{"message":"Password Updated Successfully"}
+        
+@app.post("/forgot-password")
+def forgotPassword(requestBody:ForgotPassword):
+    email = requestBody.email
+    response= run_query("SELECT user_id FROM user WHERE email_id =%s",(email,))
+    if len(response)==0:
+        return{"message":"Invalid email."}
+    payload = {
+    "user_id": response[0]["user_id"],
+    "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=5)
+    }
+    SECRET_KEY=os.getenv("SECRET_KEY")
+    token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+    url='http://localhost:5173/change-password?token='+token
+    send_email('Reset your password',url,email)
+    return{"message":"Request sent"}
+    
 
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ export default function AppContextProvider({ children }) {
   useEffect(() => {
     fetchUserInfo().then((data) => {
       setUser(data);
-      console.log("from context")
+      console.log("from context",data)
       setLoginStatus(true)
     }).catch((err)=>{
       console.log(err)

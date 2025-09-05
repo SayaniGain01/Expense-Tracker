@@ -10,7 +10,7 @@ export default function ExpenseForm({ expenses, setExpenses, cat }) {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    const amount = amountRef.current.value;
+    const amount = parseFloat(amountRef.current.value);
     const date = dateRef.current.value;
     const type = typeRef.current.value;
     const desc = descRef.current.value;

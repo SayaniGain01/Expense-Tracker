@@ -29,6 +29,10 @@ function Login() {
     alert("Something went wrong.")
   }
 }
+function togglePassword() {
+    const input = passwordRef.current;
+    input.type = input.type === "password" ? "text" : "password";
+  }
   return (
     <div className="flex h-screen">
       <div className='w-1/2 bg-teal-700'></div>
@@ -50,6 +54,7 @@ function Login() {
               placeholder="Password"
               ref={passwordRef}
             />
+            
             <button
               className="w-64 mx-6 bg-teal-700 shadow-lg shadow-gray-500/50 text-sm text-white rounded-sm py-1 mb-1.5 hover:bg-teal-600 transition cursor-pointer"
               onClick={handleLogin}
@@ -58,7 +63,7 @@ function Login() {
             </button>
             <Link
               className="text-xs mb-5 text-teal-700 cursor-pointer text-center "
-              to="http://"
+              to="/forgot-password"
             >
               Forgot Password?
             </Link>
