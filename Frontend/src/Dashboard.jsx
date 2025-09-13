@@ -13,7 +13,7 @@ export default function Dashboard() {
   const [expenses, setExpenses] = useState([]);
   const [piechartData, setPiechartData] = useState([]);
   const [barchartData, setBarchartData] = useState(null);
-  const { setUser, user, setLoginStatus } = useContext(AppContext);
+  const {fetchAndSetUser} = useContext(AppContext);
 
   async function getCategory() {
     const response = await fetch("http://localhost:8000/category", {
@@ -66,10 +66,16 @@ export default function Dashboard() {
     const data = await result.json();
     setBarchartData(data);
   }
+
+ function onDelete(id){
+  setExpenses((prevExpenses) =>
+          prevExpenses.filter((e) => e.exp_id !== id)
+        );
+ }
   
   useEffect(() => {
     getCategory();
-    setLoginStatus(true);
+    fetchAndSetUser();
     getExpenses();
     getPieChart();
     getBarChart();
@@ -90,7 +96,7 @@ export default function Dashboard() {
               Recent Expenses
             </h1>
             {expenses.map((expense) => (
-              <ExpenseCard key={expense.exp_id} expense={expense} />
+              <ExpenseCard key={expense.exp_id} expense={expense} setExpenses={setExpenses} onDelete={onDelete}/>
             ))}
           </div>
         </div>

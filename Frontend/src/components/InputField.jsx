@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 
-export default function InputField({label,type,id,value,ref}) {
+export default function InputField({label,type,id,value,ref,readOnly=false}) {
   function handleChange(e){
     ref.current.value=e.target.value
   }
@@ -20,6 +20,7 @@ export default function InputField({label,type,id,value,ref}) {
         type={type}
         ref={ref}
         onChange={handleChange}
+        readOnly={readOnly}
       />
     </div>
   );

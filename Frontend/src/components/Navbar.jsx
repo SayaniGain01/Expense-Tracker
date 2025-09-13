@@ -32,7 +32,7 @@ export default function Navbar() {
             <div className="font-semibold hover:text-red-600">Logout</div>
           </button>
           <div className="flex rounded-full border-2 items-center gap-2 w-10 h-10">
-            <img className="object-cover h-full w-full rounded-full" src={user.image || "/profile.png"} alt="Profile" />
+            <img className="object-cover h-full w-full rounded-full" src={user?.image || "/profile.png"} alt="Profile" />
           </div>
         </div>
       </nav>

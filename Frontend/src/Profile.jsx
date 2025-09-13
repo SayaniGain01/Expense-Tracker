@@ -3,9 +3,10 @@ import Navbar from "./components/Navbar";
 import InputField from "./components/InputField";
 import { AppContext } from "./context/AppContext";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export default function Profile() {
-  const { user } = useContext(AppContext);
+  const { user, setUser } = useContext(AppContext);
 
   const imageRef = useRef();
   const emailRef = useRef();
@@ -22,23 +23,60 @@ export default function Profile() {
 
   async function handleUpdate(e) {
     e.preventDefault();
+
     const formData = new FormData();
-    const file=fileRef.current.files[0]||imageRef.current.src
+    const file = fileRef.current.files[0] || imageRef.current.src;
+
     formData.append("name", nameRef.current.value);
     formData.append("email", emailRef.current.value);
     formData.append("phone", phoneRef.current.value);
-    formData.append("file", file);
-    try{
-      const response = await fetch("http://localhost:8000/user", {
-      method: "PUT",
-      body: formData,
-      credentials: "include",
+    if (file instanceof File) {
+      formData.append("file", file);
+    } else if (typeof file === "string") {
+      formData.append("imgUrl", file);
+      console.log(file)
+    }
+
+    const updatePromise = new Promise(async (resolve, reject) => {
+      try {
+        const response = await fetch("http://localhost:8000/user", {
+          method: "PUT",
+          body: formData,
+          credentials: "include",
+        });
+
+        const data = await response.json();
+        console.log(data)
+
+        if (response.status === 200) {
+          setUser(data);
+          resolve(data);
+        } else {
+          reject(data.message || "Profile update failed");
+        }
+      } catch (err) {
+        reject("Something went wrong. Please try again.");
+      }
     });
-  }
-  catch(err){
-    alert("Something went wrong")
-    console.log(err)
-  }
+
+    toast.promise(
+      updatePromise,
+      {
+        pending: "Updating profile...",
+        success: "Profile updated successfully!",
+        error: {
+          render({ data }) {
+            return data || "Failed to update profile";
+          },
+        },
+      },
+      {
+        position: "top-right",
+        autoClose: 2000,
+        pauseOnHover: true,
+        draggable: true,
+      }
+    );
   }
 
   return (
@@ -55,7 +93,7 @@ export default function Profile() {
             />
             <input
               onChange={handleFileChange}
-              className="absolute top-0 h-full w-full opacity-0 cursor-pointer "
+              className="absolute top-0 h-full w-full opacity-0 cursor-pointer"
               type="file"
               ref={fileRef}
             />
@@ -74,6 +112,7 @@ export default function Profile() {
             type={"email"}
             id={"email"}
             ref={emailRef}
+            readOnly={true}
           />
           <InputField
             value={user.phone}
@@ -83,7 +122,7 @@ export default function Profile() {
             ref={phoneRef}
           />
           <Link
-            className="text-xs text-teal-700 cursor-pointer text-center "
+            className="text-xs text-teal-700 cursor-pointer text-center"
             to="/change-password"
           >
             Change Password?

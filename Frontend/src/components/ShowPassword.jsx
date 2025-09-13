@@ -1,34 +1,31 @@
 import { useRef, useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
-function ShowPassword({ id = "password", placeholder = "Password" }, ref) {
-  const inputRef = ref || useRef();
+function ShowPassword({ id = "password", placeholder = "Password", ref,mx}, ) {
+  
   const [showPassword, setShowPassword] = useState(false);
 
   function togglePassword() {
-    const input = inputRef.current;
-    const newType = input.type === "password" ? "text" : "password";
-    input.type = newType;
-    setShowPassword(newType === "text");
+    setShowPassword((prevState)=>!prevState);
   }
 
   return (
-    <div className="relative w-64 mx-6 mb-8">
+    <div className={`relative ${mx}`}>
       <input
-        className="border border-gray-500 rounded-sm p-1.5 text-sm w-full pr-10"
-        type="password"
+        className={" border border-gray-500 rounded-sm p-1.5 text-sm w-full pr-10"}
+        type={showPassword?"text":"password"}
         id={id}
         placeholder={placeholder}
-        ref={inputRef}
+        ref={ref}
       />
-      {showPassword ? (
+      {!showPassword ? (
         <FaEyeSlash
-          className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-600"
+          className="absolute left-full top-1/2 -translate-y-1/2 -translate-x-[150%] cursor-pointer text-gray-600"
           onClick={togglePassword}
         />
       ) : (
         <FaEye
-          className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-600"
+          className="absolute left-full top-1/2 -translate-y-1/2 -translate-x-[150%] cursor-pointer text-gray-600"
           onClick={togglePassword}
         />
       )}

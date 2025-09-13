@@ -1,22 +1,46 @@
 import React, { useRef } from "react";
+import { toast } from "react-toastify";
 
 export default function ForgotPassword() {
+  const emailRef = useRef();
 
-  const emailRef=useRef()
+  async function handleEmailLink(e) {
+    e.preventDefault();
+    const email = emailRef.current.value;
+    const payload = { email };
 
-  async function handleEmailLink(e){
-    e.preventDefault()
-    const email= emailRef.current.value
-    const payload = {email}
-    const respond= await fetch("http://localhost:8000/forgot-password",{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json'
+    // Show toast.promise just like in login & signup
+    toast.promise(
+      fetch("http://localhost:8000/forgot-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+        credentials: "include",
+      }).then(async (res) => {
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.message || "Failed to send reset link");
+        }
+        return res.json();
+      }),
+      {
+        pending: "Sending reset link...",
+        success: "Password reset link sent successfully!",
+        error: {
+          render({ data }) {
+            return data.message || "Something went wrong!";
+          },
+        },
       },
-      body:JSON.stringify(payload),
-      credentials:"include"
-    })
-    
+      {
+        position: "top-right",
+        autoClose: 2000,
+        pauseOnHover: true,
+        draggable: true,
+      }
+    );
   }
 
   return (
