@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
+import Home from "./Home";
 import Login from "./Login";
 import SignUp from "./SignUp";
 import Dashboard from "./Dashboard";
@@ -16,7 +17,8 @@ function App() {
       path: "/",
       element: <RootLayout />,
       children: [
-        { index: true, element: <Login /> },
+        { index: true, element: <Home /> },
+        { path: "login", element: <Login /> },
         { path: "signup", element: <SignUp /> },
         { path: "dashboard", element: <Dashboard /> },
         { path: "profile", element: <Profile /> },
