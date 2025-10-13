@@ -13,7 +13,7 @@ export default function Navbar() {
     }
     )
     const data = await response.json()
-    navigate("/")
+    navigate("/login")
   }
   return (
     <div>
