@@ -98,7 +98,7 @@ export default function ChangePassword() {
         </div>
 
         <h3 className="text-xl font-semibold mb-2 pl-4">
-          Change your password
+          Change Your Password
         </h3>
         <p className="text-gray-600 text-xs mb-4 pl-4">
           Enter a new password below to change your password
