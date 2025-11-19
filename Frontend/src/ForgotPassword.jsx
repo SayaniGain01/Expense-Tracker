@@ -54,7 +54,7 @@ export default function ForgotPassword() {
           />
         </div>
 
-        <h2 className="text-xl font-semibold mb-2 pl-4">Forgot password</h2>
+        <h2 className="text-xl font-semibold mb-2 pl-4">Forgot Password</h2>
         <p className="text-gray-600 text-xs mb-8 pl-4">
           Please enter the email address you’d like your password reset
           information sent to
